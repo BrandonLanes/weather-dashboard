@@ -94,10 +94,11 @@ class WeatherService {
     this.lastSearchedCity = city;
 
     const coordinates = await this.fetchAndDestructureLocationData(city);
-
     const weatherData = await this.fetchWeatherData(coordinates);
+    const currentWeather = this.parseCurrentWeather(weatherData)
+    const forecast = this.buildForecastArray(currentWeather, weatherData.daily)
 
-    return this.parseCurrentWeather(weatherData);
+    return this.parseCurrentWeather(forecast);
   }
 
   public getLastSearchedCity(): string | null {
