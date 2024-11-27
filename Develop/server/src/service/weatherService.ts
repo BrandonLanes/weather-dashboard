@@ -21,7 +21,7 @@ class Weather {
 // TODO: Complete the WeatherService class
 class WeatherService {
   // TODO: Define the baseURL, API key, and city name properties
-  private baseURL = 'https://api.openweathermap.org';
+  private baseURL = 'https://api.openweathermap.org/data/2.5';
   private geoURL = 'https://api.openweathermap.org/geo/1.0/direct';
   private apiKey = process.env.API_KEY || '';
   private lastSearchedCity: string | null = null;
@@ -49,7 +49,7 @@ class WeatherService {
   }
   // TODO: Create buildWeatherQuery method
   private buildWeatherQuery(coordinates: Coordinates): string {
-    return `${this.baseURL}/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}&units=metric`;
+    return `${this.baseURL}/forecast?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}&units=metric`;
   }
   // TODO: Create fetchAndDestructureLocationData method
   private async fetchAndDestructureLocationData(city: string): Promise<Coordinates> {
@@ -60,7 +60,6 @@ class WeatherService {
   private async fetchWeatherData(coordinates: Coordinates): Promise<any> {
     const query = this.buildWeatherQuery(coordinates);
     const response = await fetch(query);
-
     if (!response.ok) {
       throw new Error(`Error fetching weater data: ${response.statusText}`);
     }
@@ -69,19 +68,19 @@ class WeatherService {
   }
   // TODO: Build parseCurrentWeather method
   private parseCurrentWeather(response: any): Weather {
-    return new Weather(response.main.temp, response.wearther[0].description);
+    return new Weather(response.list[0].main.temp, response.list[0].weather[0].description);
   }
   // TODO: Complete buildForecastArray method
   private buildForecastArray(currentWeather: Weather, weatherData: any[]): Weather[] {
-    const forecastArray: Weather[] = [];
-
+    const forecastArray = [];
     for (const item of weatherData) {
+      console.log(item)
       forecastArray.push(
         new Weather(item.main.temp, item.weather[0].description)
       );
     }
-
-    forecastArray.unshift(currentWeather);
+      console.log(currentWeather)
+    // forecastArray.unshift(currentWeather);
 
     return forecastArray;
   }
@@ -96,7 +95,7 @@ class WeatherService {
     const coordinates = await this.fetchAndDestructureLocationData(city);
     const weatherData = await this.fetchWeatherData(coordinates);
     const currentWeather = this.parseCurrentWeather(weatherData)
-    const forecast = this.buildForecastArray(currentWeather, weatherData.daily)
+    const forecast = this.buildForecastArray(currentWeather, weatherData.list)
 
     return this.parseCurrentWeather(forecast);
   }
