@@ -16,7 +16,7 @@ router.post('/', async (req: Request, res: Response) => {
   // TODO: GET weather data from city name
   try {
     const weatherData = await WeatherService.getWeatherForCity(cityName);
-    console.log(weatherData);
+    // console.log(weatherData);
 
     await HistoryService.addCity(cityName);
 

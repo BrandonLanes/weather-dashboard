@@ -9,12 +9,21 @@ interface Coordinates {
 
 // TODO: Define a class for the Weather object
 class Weather {
-  temperature: number;
-  condition: string;
+  tempF: number;
+  icon: string;
+  iconDescription: string;
+  humidity: number;
+  windSpeed: number;
+  date: number;
 
-  constructor(temperature: number, condition: string) {
-    this.temperature = temperature;
-    this.condition = condition;
+
+  constructor(temperature: number, icon: string, iconDescription: string, humidity: number, wind: number, date: number) {
+    this.tempF = temperature;
+    this.icon = icon;
+    this.iconDescription = iconDescription;
+    this.humidity = humidity;
+    this.windSpeed = wind;
+    this.date = date;
   }
 }
 
@@ -41,6 +50,7 @@ class WeatherService {
     if (!locationData || locationData.length === 0) {
       throw new Error('Location not found.');
     }
+    console.log(locationData);
     return { lat: locationData[0].lat, lon: locationData[0].lon };
   }
   // TODO: Create buildGeocodeQuery method
@@ -68,24 +78,27 @@ class WeatherService {
   }
   // TODO: Build parseCurrentWeather method
   private parseCurrentWeather(response: any): Weather {
-    return new Weather(response.list[0].main.temp, response.list[0].weather[0].description);
+    console.log(response);
+    return response[0];
   }
+  
   // TODO: Complete buildForecastArray method
-  private buildForecastArray(currentWeather: Weather, weatherData: any[]): Weather[] {
+  private buildForecastArray(_currentWeather: Weather, weatherData: any[]): Weather[] {
     const forecastArray = [];
-    for (const item of weatherData) {
-      console.log(item)
-      forecastArray.push(
-        new Weather(item.main.temp, item.weather[0].description)
-      );
-    }
-      console.log(currentWeather)
+    for (let i = 0; i < weatherData.length; i++) {
+      if (i === 0 || i % 7 === 0) {
+        const item = weatherData[i];
+        forecastArray.push(
+          new Weather(item.main.temp, item.weather[0].icon, item.weather[0].description, item.main.humidity, item.wind.speed, item.dt_txt)
+        );
+      }
+      // console.log(currentWeather)
     // forecastArray.unshift(currentWeather);
-
+    }
     return forecastArray;
   }
   // TODO: Complete getWeatherForCity method
-  public async getWeatherForCity(city: string): Promise<Weather> {
+  public async getWeatherForCity(city: string): Promise<Weather[]> {
     if (!this.apiKey) {
       throw new Error('API key is missing.');
     }
@@ -97,7 +110,7 @@ class WeatherService {
     const currentWeather = this.parseCurrentWeather(weatherData)
     const forecast = this.buildForecastArray(currentWeather, weatherData.list)
 
-    return this.parseCurrentWeather(forecast);
+    return forecast;
   }
 
   public getLastSearchedCity(): string | null {
